@@ -3,7 +3,6 @@
 <<<<<<< HEAD
 =======
 ## Open source code link (https://github.com/meshtastic/meshtastic)
->>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 ## The following are all the contents in this warehouse organized into separate directories. Each directory stores the corresponding information. When you need it, go to the specified directory to search. The name of each directory is shown below:
 ### Docs is the product hardware specification and hardware parameters
 ### Firmware is used to store the hex and bin files burned into the hardware
