@@ -2083,6 +2083,14 @@ int32_t GPS::disable()
     return INT32_MAX;
 }
 
+<<<<<<< HEAD
+bool GPS::readenabled()
+{
+    return enabled;
+}
+
+=======
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 void GPS::toggleGpsMode()
 {
     if (config.position.gps_mode == meshtastic_Config_PositionConfig_GpsMode_ENABLED)

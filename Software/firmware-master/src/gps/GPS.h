@@ -220,6 +220,11 @@ public:
   // Let the GPS hardware save power between updates
   void down();
 
+<<<<<<< HEAD
+  bool readenabled();
+
+=======
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 protected:
   /**
    * Perform any processing that should be done only while the GPS is awake and looking for a fix.

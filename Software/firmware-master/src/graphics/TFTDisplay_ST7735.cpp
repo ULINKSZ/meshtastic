@@ -9,6 +9,10 @@
 #include "modules/AdminModule.h"
 
 size_t cur_nodeIndex = 0;
+<<<<<<< HEAD
+
+=======
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 uint8_t
     Rcmd1[] = {                       // 7735R init, part 1 (red or green tab)
         15,                           // 15 commands in list:
@@ -223,6 +227,15 @@ void gps_refresh()
     lv_obj_add_event_cb(cb, Use_gps, LV_EVENT_ALL, NULL);
     lv_obj_update_layout(cb);
 
+<<<<<<< HEAD
+    LOG_DEBUG("gps->readenabled() = %d", gps->readenabled());
+
+    if (gps->readenabled() == true)
+    {
+        lv_obj_add_state(cb, LV_STATE_CHECKED);
+    }
+    else if (gps->readenabled() == false)
+=======
     LOG_DEBUG("gps->powerState = %d", gps->powerState);
 
     if (gps->powerState == GPS_ACTIVE)
@@ -230,6 +243,7 @@ void gps_refresh()
         lv_obj_add_state(cb, LV_STATE_CHECKED);
     }
     else if (gps->powerState == GPS_OFF)
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
     {
         lv_obj_clear_state(cb, LV_STATE_CHECKED);
     }
@@ -495,7 +509,17 @@ void ST7735::ST7735init()
     pinMode(_csPin, OUTPUT);
     pinMode(_dcPin, OUTPUT);
     pinMode(_rstPin, OUTPUT);
+<<<<<<< HEAD
+    pinMode(_back_ledPin, OUTPUT_H0H1);
+
+    // uint32_t a = NRF_UICR->REGOUT0;
+    // LOG_DEBUG("NRF_UICR->REGOUT0=%d", a);
+    // NRF_UICR->REGOUT0 = 0X5;
+    // a = NRF_UICR->REGOUT0;
+    // LOG_DEBUG("NRF_UICR->REGOUT0=%d", a);
+=======
     pinMode(_back_ledPin, OUTPUT_S0D1);
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 
     digitalWrite(_rstPin, HIGH);
     delay(5);
@@ -668,7 +692,18 @@ void ST7735::displayInit(uint8_t *addr)
 
 void ST7735::set_screen(char state)
 {
+<<<<<<< HEAD
+    if (state)
+    {
+        analogWrite(_back_ledPin, 255);
+    }
+    else
+    {
+        analogWrite(_back_ledPin, 0);
+    }
+=======
     digitalWrite(_back_ledPin, state);
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 }
 
 void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
@@ -683,12 +718,20 @@ void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *c
 void battery_refresh(lv_obj_t *container)
 {
 
+<<<<<<< HEAD
+    if (gps->readenabled() == true)
+=======
     if (gps->powerState == GPS_ACTIVE)
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
     {
         gps_icon = lv_label_create(container);
         lv_label_set_text(gps_icon, LV_SYMBOL_GPS); // GPS
     }
+<<<<<<< HEAD
+    else if (gps->readenabled() == false)
+=======
     else if (gps->powerState == GPS_OFF)
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
     {
         gps_icon = lv_label_create(container);
         lv_label_set_text(gps_icon, LV_SYMBOL_DUMMY); // GPS
@@ -701,6 +744,10 @@ void battery_refresh(lv_obj_t *container)
     if (powerStatus->getIsCharging())
     {
         lv_label_set_text(battery, LV_SYMBOL_BATTERY_FULL); // 设置为中等电量
+<<<<<<< HEAD
+        lv_label_set_text_fmt(BatteryChargePercent, "%d%%", powerStatus->getBatteryChargePercent());
+=======
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
     }
     else
     {
@@ -803,7 +850,10 @@ void screen3_handler(lv_event_t *e)
 
 void screen2_handler(lv_event_t *e)
 {
+<<<<<<< HEAD
+=======
 
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
     lv_event_code_t code = lv_event_get_code(e);
     if (code == LV_EVENT_REFRESH)
     {
@@ -845,6 +895,9 @@ void Use_gps(lv_event_t *e)
     lv_obj_t *obj = lv_event_get_target(e);
     if (code == LV_EVENT_VALUE_CHANGED)
     {
+<<<<<<< HEAD
+        gps->toggleGpsMode();
+=======
         if (lv_obj_get_state(obj) & LV_STATE_CHECKED)
         {
             if (config.position.gps_mode == meshtastic_Config_PositionConfig_GpsMode_DISABLED)
@@ -863,16 +916,25 @@ void Use_gps(lv_event_t *e)
                 gps->disable();
             }
         }
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
     }
 }
 
 void icon_refresh()
 {
+<<<<<<< HEAD
+    if (gps->readenabled() == true)
+    {
+        lv_label_set_text(gps_icon, LV_SYMBOL_GPS);
+    }
+    else if (gps->readenabled() == false)
+=======
     if (gps->powerState == GPS_ACTIVE)
     {
         lv_label_set_text(gps_icon, LV_SYMBOL_GPS);
     }
     else if (gps->powerState == GPS_OFF)
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
     {
         lv_label_set_text(gps_icon, LV_SYMBOL_DUMMY);
     }
@@ -904,7 +966,11 @@ void icon_refresh()
     {
         lv_label_set_text(lora, LV_SYMBOL_WIFI); // lora
     }
+<<<<<<< HEAD
+    if (BatteryChargePercent != NULL)
+=======
     if (lora != NULL)
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
     {
         lv_label_set_text_fmt(BatteryChargePercent, "%d%%", powerStatus->getBatteryChargePercent());
     }
@@ -1064,6 +1130,8 @@ void keypad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data)
     data->key = last_key;
 }
 
+<<<<<<< HEAD
+=======
 void checkbox_event_handler(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -1075,6 +1143,7 @@ void checkbox_event_handler(lv_event_t *e)
     }
 }
 
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 void scr_refresh()
 {
     lv_event_send(lv_scr_act(), LV_EVENT_REFRESH, NULL);

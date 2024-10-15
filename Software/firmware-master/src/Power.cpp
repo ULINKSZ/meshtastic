@@ -730,8 +730,13 @@ void Power::readPowerStatus()
                 powerFSM.trigger(EVENT_POWER_DISCONNECTED);
                 NRF_USB = OptFalse;
                 // rebootAtMsec = (millis() + 2 * 1000);
+<<<<<<< HEAD
+                // if (power != NULL)
+                //     power->setup();
+=======
                 if (power != NULL)
                     power->setup();
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
             }
             // If changed to CONNECTED / READY
             else

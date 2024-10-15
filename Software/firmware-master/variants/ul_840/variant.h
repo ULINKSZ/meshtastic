@@ -45,9 +45,16 @@ extern "C"
 #define NUM_ANALOG_OUTPUTS (0)
 
 // LEDs
+<<<<<<< HEAD
+// #define PIN_LED1 (38)
+// #define PIN_LED2 (24)
+#define PIN_LED1 (24)
+#define PIN_LED2 (38)
+=======
 #define PIN_LED1 (38)
 #define PIN_LED2 (24)
 
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 #define LED_BUILTIN PIN_LED1
 #define LED_CONN PIN_LED2
 
@@ -118,9 +125,15 @@ extern "C"
 #define PIN_SPI1_MOSI (23) // (0 + 30)
 #define PIN_SPI1_SCK (42)  // (0 + 3)
   // danamzi
+<<<<<<< HEAD
+  // #define PIN_SPI1_MISO (31) // (0 + 29)
+  // #define PIN_SPI1_MOSI (23) // (0 + 30)
+  // #define PIN_SPI1_SCK (35)  // (0 + 3)
+=======
   //  #define PIN_SPI1_MISO (31) // (0 + 29)
   //  #define PIN_SPI1_MOSI (23) // (0 + 30)
   //  #define PIN_SPI1_SCK (35)   // (0 + 3)
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 
   static const uint8_t SS = 21;
   static const uint8_t MOSI = PIN_SPI_MOSI;
@@ -227,9 +240,12 @@ extern "C"
 #define MESHTASTIC_EXCLUDE_REMOTEHARDWARE 1
 #define MESHTASTIC_EXCLUDE_INPUTBROKER 1
 
+<<<<<<< HEAD
+=======
 
 
 
+>>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 #ifdef __cplusplus
 }
 #endif
