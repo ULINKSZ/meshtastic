@@ -56,7 +56,8 @@ void setCPUFast(bool on)
 {
 #if defined(ARCH_ESP32) && HAS_WIFI
 
-    if (isWifiAvailable()) {
+    if (isWifiAvailable())
+    {
         /*
          *
          * There's a newly introduced bug in the espressif framework where WiFi is
@@ -93,8 +94,9 @@ void setLed(bool ledOn)
     digitalWrite(LED_PIN, ledOn ^ LED_INVERTED);
 #endif
 
-#if defined (HAS_PMU)&&!(HAS_MAX17048)
-    if (pmu_found && PMU) {
+#if defined(HAS_PMU) && !(HAS_MAX17048)
+    if (pmu_found && PMU)
+    {
         // blink the axp led
         PMU->setChargingLedMode(ledOn ? XPOWERS_CHG_LED_ON : XPOWERS_CHG_LED_OFF);
     }
@@ -109,7 +111,8 @@ void initDeepSleep()
     const char *reason;
     wakeCause = esp_sleep_get_wakeup_cause();
 
-    switch (wakeCause) {
+    switch (wakeCause)
+    {
     case ESP_SLEEP_WAKEUP_EXT0:
         reason = "ext0 RTC_IO";
         break;
@@ -155,9 +158,11 @@ void initDeepSleep()
 
 #if SOC_RTCIO_HOLD_SUPPORTED
     // If waking from sleep, release any and all RTC GPIOs
-    if (wakeCause != ESP_SLEEP_WAKEUP_UNDEFINED) {
+    if (wakeCause != ESP_SLEEP_WAKEUP_UNDEFINED)
+    {
         LOG_DEBUG("Disabling any holds on RTC IO pads\n");
-        for (uint8_t i = 0; i <= GPIO_NUM_MAX; i++) {
+        for (uint8_t i = 0; i <= GPIO_NUM_MAX; i++)
+        {
             if (rtc_gpio_is_valid_gpio((gpio_num_t)i))
                 rtc_gpio_hold_dis((gpio_num_t)i);
 
@@ -182,12 +187,15 @@ bool doPreflightSleep()
 /// Tell devices we are going to sleep and wait for them to handle things
 static void waitEnterSleep(bool skipPreflight = false)
 {
-    if (!skipPreflight) {
+    if (!skipPreflight)
+    {
         uint32_t now = millis();
-        while (!doPreflightSleep()) {
+        while (!doPreflightSleep())
+        {
             delay(100); // Kinda yucky - wait until radio says say we can shutdown (finished in process sends/receives)
 
-            if (millis() - now > 30 * 1000) { // If we wait too long just report an error and go to sleep
+            if (millis() - now > 30 * 1000)
+            { // If we wait too long just report an error and go to sleep
                 RECORD_CRITICALERROR(meshtastic_CriticalErrorCode_SLEEP_ENTER_WAIT);
                 assert(0); // FIXME - for now we just restart, need to fix bug #167
                 break;
@@ -204,9 +212,12 @@ static void waitEnterSleep(bool skipPreflight = false)
 
 void doDeepSleep(uint32_t msecToWake, bool skipPreflight = false)
 {
-    if (INCLUDE_vTaskSuspend && (msecToWake == portMAX_DELAY)) {
+    if (INCLUDE_vTaskSuspend && (msecToWake == portMAX_DELAY))
+    {
         LOG_INFO("Entering deep sleep forever\n");
-    } else {
+    }
+    else
+    {
         LOG_INFO("Entering deep sleep for %u seconds\n", msecToWake / 1000);
     }
 
@@ -214,6 +225,11 @@ void doDeepSleep(uint32_t msecToWake, bool skipPreflight = false)
     // esp_wifi_stop();
     waitEnterSleep(skipPreflight);
 
+#ifdef ul_840
+    rIf->sleep();
+    pinMode(PIN_SERIAL1_RX, INPUT);
+    pinMode(PIN_SERIAL1_TX, INPUT);
+#endif
 #if defined(ARCH_ESP32) && !MESHTASTIC_EXCLUDE_BLUETOOTH
     // Full shutdown of bluetooth hardware
     if (nimbleBluetooth)
@@ -221,9 +237,12 @@ void doDeepSleep(uint32_t msecToWake, bool skipPreflight = false)
 #endif
 
 #ifdef ARCH_ESP32
-    if (shouldLoraWake(msecToWake)) {
+    if (shouldLoraWake(msecToWake))
+    {
         notifySleep.notifyObservers(NULL);
-    } else {
+    }
+    else
+    {
         notifyDeepSleep.notifyObservers(NULL);
     }
 #else
@@ -275,12 +294,14 @@ void doDeepSleep(uint32_t msecToWake, bool skipPreflight = false)
 #endif
 
 #ifdef ARCH_ESP32
-    if (shouldLoraWake(msecToWake)) {
+    if (shouldLoraWake(msecToWake))
+    {
         enableLoraInterrupt();
     }
 #ifdef BUTTON_PIN
     // Avoid leakage through button pin
-    if (GPIO_IS_VALID_OUTPUT_GPIO(BUTTON_PIN)) {
+    if (GPIO_IS_VALID_OUTPUT_GPIO(BUTTON_PIN))
+    {
 #ifdef BUTTON_NEED_PULLUP
         pinMode(BUTTON_PIN, INPUT_PULLUP);
 #else
@@ -289,7 +310,8 @@ void doDeepSleep(uint32_t msecToWake, bool skipPreflight = false)
         gpio_hold_en((gpio_num_t)BUTTON_PIN);
     }
 #endif
-    if (GPIO_IS_VALID_OUTPUT_GPIO(LORA_CS)) {
+    if (GPIO_IS_VALID_OUTPUT_GPIO(LORA_CS))
+    {
         // LoRa CS (RADIO_NSS) needs to stay HIGH, even during deep sleep
         pinMode(LORA_CS, OUTPUT);
         digitalWrite(LORA_CS, HIGH);
@@ -297,8 +319,9 @@ void doDeepSleep(uint32_t msecToWake, bool skipPreflight = false)
     }
 #endif
 
-#if defined (HAS_PMU)&&!(HAS_MAX17048)
-    if (pmu_found && PMU) {
+#if defined(HAS_PMU) && !(HAS_MAX17048)
+    if (pmu_found && PMU)
+    {
         // Obsolete comment: from back when we we used to receive lora packets while CPU was in deep sleep.
         // We no longer do that, because our light-sleep current draws are low enough and it provides fast start/low cost
         // wake.  We currently use deep sleep only for 'we want our device to actually be off - because our battery is
@@ -312,19 +335,26 @@ void doDeepSleep(uint32_t msecToWake, bool skipPreflight = false)
         PMU->setChargingLedMode(XPOWERS_CHG_LED_OFF);
 
         uint8_t model = PMU->getChipModel();
-        if (model == XPOWERS_AXP2101) {
-            if (HW_VENDOR == meshtastic_HardwareModel_TBEAM) {
+        if (model == XPOWERS_AXP2101)
+        {
+            if (HW_VENDOR == meshtastic_HardwareModel_TBEAM)
+            {
                 // t-beam v1.2 radio power channel
                 PMU->disablePowerOutput(XPOWERS_ALDO2); // lora radio power channel
-            } else if (HW_VENDOR == meshtastic_HardwareModel_LILYGO_TBEAM_S3_CORE ||
-                       HW_VENDOR == meshtastic_HardwareModel_T_WATCH_S3) {
+            }
+            else if (HW_VENDOR == meshtastic_HardwareModel_LILYGO_TBEAM_S3_CORE ||
+                     HW_VENDOR == meshtastic_HardwareModel_T_WATCH_S3)
+            {
                 PMU->disablePowerOutput(XPOWERS_ALDO3); // lora radio power channel
             }
-        } else if (model == XPOWERS_AXP192) {
+        }
+        else if (model == XPOWERS_AXP192)
+        {
             // t-beam v1.1 radio power channel
             PMU->disablePowerOutput(XPOWERS_LDO2); // lora radio power channel
         }
-        if (msecToWake == portMAX_DELAY) {
+        if (msecToWake == portMAX_DELAY)
+        {
             LOG_INFO("PMU shutdown.\n");
             console->flush();
             PMU->shutdown();
@@ -398,19 +428,22 @@ esp_sleep_wakeup_cause_t doLightSleep(uint64_t sleepMsec) // FIXME, use a more r
         gpio_wakeup_enable((gpio_num_t)PMU_IRQ, GPIO_INTR_LOW_LEVEL); // pmu irq
 #endif
     auto res = esp_sleep_enable_gpio_wakeup();
-    if (res != ESP_OK) {
+    if (res != ESP_OK)
+    {
         LOG_ERROR("esp_sleep_enable_gpio_wakeup result %d\n", res);
     }
     assert(res == ESP_OK);
     res = esp_sleep_enable_timer_wakeup(sleepUsec);
-    if (res != ESP_OK) {
+    if (res != ESP_OK)
+    {
         LOG_ERROR("esp_sleep_enable_timer_wakeup result %d\n", res);
     }
     assert(res == ESP_OK);
 
     console->flush();
     res = esp_light_sleep_start();
-    if (res != ESP_OK) {
+    if (res != ESP_OK)
+    {
         LOG_ERROR("esp_light_sleep_start result %d\n", res);
     }
     // commented out because it's not that crucial;
@@ -428,22 +461,26 @@ esp_sleep_wakeup_cause_t doLightSleep(uint64_t sleepMsec) // FIXME, use a more r
 #endif
 
 #if !defined(SOC_PM_SUPPORT_EXT_WAKEUP) && defined(LORA_DIO1) && (LORA_DIO1 != RADIOLIB_NC)
-    if (radioType != RF95_RADIO) {
+    if (radioType != RF95_RADIO)
+    {
         gpio_wakeup_disable((gpio_num_t)LORA_DIO1);
     }
 #endif
 #if defined(RF95_IRQ) && (RF95_IRQ != RADIOLIB_NC)
-    if (radioType == RF95_RADIO) {
+    if (radioType == RF95_RADIO)
+    {
         gpio_wakeup_disable((gpio_num_t)RF95_IRQ);
     }
 #endif
 
     esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
 #ifdef BUTTON_PIN
-    if (cause == ESP_SLEEP_WAKEUP_GPIO) {
+    if (cause == ESP_SLEEP_WAKEUP_GPIO)
+    {
         LOG_INFO("Exit light sleep gpio: btn=%d\n",
                  !digitalRead(config.device.button_gpio ? config.device.button_gpio : BUTTON_PIN));
-    } else
+    }
+    else
 #endif
     {
         LOG_INFO("Exit light sleep cause: %d\n", cause);
@@ -497,23 +534,28 @@ void enableLoraInterrupt()
     gpio_pullup_en((gpio_num_t)LORA_CS);
 #endif
 
-    if (rtc_gpio_is_valid_gpio((gpio_num_t)LORA_DIO1)) {
+    if (rtc_gpio_is_valid_gpio((gpio_num_t)LORA_DIO1))
+    {
         // Setup light/deep sleep with wakeup by external source
         LOG_INFO("setup LORA_DIO1 (GPIO%02d) with wakeup by external source\n", LORA_DIO1);
         esp_sleep_enable_ext0_wakeup((gpio_num_t)LORA_DIO1, HIGH);
-    } else {
+    }
+    else
+    {
         LOG_INFO("setup LORA_DIO1 (GPIO%02d) with wakeup by gpio interrupt\n", LORA_DIO1);
         gpio_wakeup_enable((gpio_num_t)LORA_DIO1, GPIO_INTR_HIGH_LEVEL);
     }
 
 #elif defined(LORA_DIO1) && (LORA_DIO1 != RADIOLIB_NC)
-    if (radioType != RF95_RADIO) {
+    if (radioType != RF95_RADIO)
+    {
         LOG_INFO("setup LORA_DIO1 (GPIO%02d) with wakeup by gpio interrupt\n", LORA_DIO1);
         gpio_wakeup_enable((gpio_num_t)LORA_DIO1, GPIO_INTR_HIGH_LEVEL); // SX126x/SX128x interrupt, active high
     }
 #endif
 #if defined(RF95_IRQ) && (RF95_IRQ != RADIOLIB_NC)
-    if (radioType == RF95_RADIO) {
+    if (radioType == RF95_RADIO)
+    {
         LOG_INFO("setup RF95_IRQ (GPIO%02d) with wakeup by gpio interrupt\n", RF95_IRQ);
         gpio_wakeup_enable((gpio_num_t)RF95_IRQ, GPIO_INTR_HIGH_LEVEL); // RF95 interrupt, active high
     }

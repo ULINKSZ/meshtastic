@@ -10,6 +10,7 @@
 #include "mesh/generated/meshtastic/telemetry.pb.h"
 #include <SPI.h>
 #include <map>
+#include "RadioInterface.h"
 #if !defined(ARCH_PORTDUINO) && !defined(ARCH_STM32WL)
 #include <SparkFun_ATECCX08a_Arduino_Library.h>
 #endif
@@ -93,3 +94,5 @@ meshtastic_DeviceMetadata getDeviceMetadata();
 
 // FIXME, we default to 4MHz SPI, SPI mode 0, check if the datasheet says it can really do that
 extern SPISettings spiSettings;
+
+extern RadioInterface *rIf;

@@ -31,7 +31,8 @@ static inline int readRegister(uint8_t address, uint8_t reg, uint8_t *data, uint
     Wire.endTransmission();
     Wire.requestFrom((uint8_t)address, (uint8_t)len);
     uint8_t i = 0;
-    while (Wire.available()) {
+    while (Wire.available())
+    {
         data[i++] = Wire.read();
     }
     return 0; // Pass
@@ -47,17 +48,19 @@ static inline int writeRegister(uint8_t address, uint8_t reg, uint8_t *data, uin
 
 class AccelerometerThread : public concurrency::OSThread
 {
-  public:
+public:
     explicit AccelerometerThread(ScanI2C::DeviceType type) : OSThread("AccelerometerThread")
     {
-        if (accelerometer_found.port == ScanI2C::I2CPort::NO_I2C) {
+        if (accelerometer_found.port == ScanI2C::I2CPort::NO_I2C)
+        {
             LOG_DEBUG("AccelerometerThread disabling due to no sensors found\n");
             disable();
             return;
         }
         acceleremoter_type = type;
 #ifndef RAK_4631
-        if (!config.display.wake_on_tap_or_motion && !config.device.double_tap_as_button_press) {
+        if (!config.display.wake_on_tap_or_motion && !config.device.double_tap_as_button_press)
+        {
             LOG_DEBUG("AccelerometerThread disabling due to no interested configurations\n");
             disable();
             return;
@@ -72,30 +75,40 @@ class AccelerometerThread : public concurrency::OSThread
         setIntervalFromNow(0);
     };
 
-  protected:
+protected:
     int32_t runOnce() override
     {
         canSleep = true; // Assume we should not keep the board awake
 
-        if (acceleremoter_type == ScanI2C::DeviceType::MPU6050 && mpu.getMotionInterruptStatus()) {
+        if (acceleremoter_type == ScanI2C::DeviceType::MPU6050 && mpu.getMotionInterruptStatus())
+        {
             wakeScreen();
-        } else if (acceleremoter_type == ScanI2C::DeviceType::LIS3DH && lis.getClick() > 0) {
+        }
+        else if (acceleremoter_type == ScanI2C::DeviceType::LIS3DH && lis.getClick() > 0)
+        {
             uint8_t click = lis.getClick();
-            if (!config.device.double_tap_as_button_press) {
+            if (!config.device.double_tap_as_button_press)
+            {
                 wakeScreen();
             }
 
-            if (config.device.double_tap_as_button_press && (click & 0x20)) {
+            if (config.device.double_tap_as_button_press && (click & 0x20))
+            {
                 buttonPress();
                 return 500;
             }
-        } else if (acceleremoter_type == ScanI2C::DeviceType::BMA423 && bmaSensor.readIrqStatus() != DEV_WIRE_NONE) {
-            if (bmaSensor.isTilt() || bmaSensor.isDoubleTap()) {
+        }
+        else if (acceleremoter_type == ScanI2C::DeviceType::BMA423 && bmaSensor.readIrqStatus() != DEV_WIRE_NONE)
+        {
+            if (bmaSensor.isTilt() || bmaSensor.isDoubleTap())
+            {
                 wakeScreen();
                 return 500;
             }
 #ifdef RAK_4631
-        } else if (acceleremoter_type == ScanI2C::DeviceType::BMX160) {
+        }
+        else if (acceleremoter_type == ScanI2C::DeviceType::BMX160)
+        {
             sBmx160SensorData_t magAccel;
             sBmx160SensorData_t gAccel;
 
@@ -103,8 +116,10 @@ class AccelerometerThread : public concurrency::OSThread
             bmx160.getAllData(&magAccel, NULL, &gAccel);
 
             // expirimental calibrate routine. Limited to between 10 and 30 seconds after boot
-            if (millis() > 12 * 1000 && millis() < 30 * 1000) {
-                if (!showingScreen) {
+            if (millis() > 12 * 1000 && millis() < 30 * 1000)
+            {
+                if (!showingScreen)
+                {
                     showingScreen = true;
                     screen->startAlert((FrameCallback)drawFrameCalibration);
                 }
@@ -120,7 +135,9 @@ class AccelerometerThread : public concurrency::OSThread
                     highestZ = magAccel.z;
                 if (magAccel.z < lowestZ)
                     lowestZ = magAccel.z;
-            } else if (showingScreen && millis() >= 30 * 1000) {
+            }
+            else if (showingScreen && millis() >= 30 * 1000)
+            {
                 showingScreen = false;
                 screen->endAlert();
             }
@@ -139,14 +156,16 @@ class AccelerometerThread : public concurrency::OSThread
             ma.axis.z = magAccel.z * 3;
 
             // If we're set to one of the inverted positions
-            if (config.display.compass_orientation > meshtastic_Config_DisplayConfig_CompassOrientation_DEGREES_270) {
+            if (config.display.compass_orientation > meshtastic_Config_DisplayConfig_CompassOrientation_DEGREES_270)
+            {
                 ma = FusionAxesSwap(ma, FusionAxesAlignmentNXNYPZ);
                 ga = FusionAxesSwap(ga, FusionAxesAlignmentNXNYPZ);
             }
 
             float heading = FusionCompassCalculateHeading(FusionConventionNed, ga, ma);
 
-            switch (config.display.compass_orientation) {
+            switch (config.display.compass_orientation)
+            {
             case meshtastic_Config_DisplayConfig_CompassOrientation_DEGREES_0_INVERTED:
             case meshtastic_Config_DisplayConfig_CompassOrientation_DEGREES_0:
                 break;
@@ -167,7 +186,9 @@ class AccelerometerThread : public concurrency::OSThread
             screen->setHeading(heading);
 
 #endif
-        } else if (acceleremoter_type == ScanI2C::DeviceType::LSM6DS3 && lsm.shake()) {
+        }
+        else if (acceleremoter_type == ScanI2C::DeviceType::LSM6DS3 && lsm.shake())
+        {
             wakeScreen();
             return 500;
         }
@@ -175,12 +196,13 @@ class AccelerometerThread : public concurrency::OSThread
         return ACCELEROMETER_CHECK_INTERVAL_MS;
     }
 
-  private:
+private:
     void init()
     {
         LOG_DEBUG("AccelerometerThread initializing\n");
 
-        if (acceleremoter_type == ScanI2C::DeviceType::MPU6050 && mpu.begin(accelerometer_found.address)) {
+        if (acceleremoter_type == ScanI2C::DeviceType::MPU6050 && mpu.begin(accelerometer_found.address))
+        {
             LOG_DEBUG("MPU6050 initializing\n");
             // setup motion detection
             mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
@@ -188,13 +210,17 @@ class AccelerometerThread : public concurrency::OSThread
             mpu.setMotionDetectionDuration(20);
             mpu.setInterruptPinLatch(true); // Keep it latched.  Will turn off when reinitialized.
             mpu.setInterruptPinPolarity(true);
-        } else if (acceleremoter_type == ScanI2C::DeviceType::LIS3DH && lis.begin(accelerometer_found.address)) {
+        }
+        else if (acceleremoter_type == ScanI2C::DeviceType::LIS3DH && lis.begin(accelerometer_found.address))
+        {
             LOG_DEBUG("LIS3DH initializing\n");
             lis.setRange(LIS3DH_RANGE_2_G);
             // Adjust threshold, higher numbers are less sensitive
             lis.setClick(config.device.double_tap_as_button_press ? 2 : 1, ACCELEROMETER_CLICK_THRESHOLD);
-        } else if (acceleremoter_type == ScanI2C::DeviceType::BMA423 &&
-                   bmaSensor.begin(accelerometer_found.address, &readRegister, &writeRegister)) {
+        }
+        else if (acceleremoter_type == ScanI2C::DeviceType::BMA423 &&
+                 bmaSensor.begin(accelerometer_found.address, &readRegister, &writeRegister))
+        {
             LOG_DEBUG("BMA423 initializing\n");
             bmaSensor.configAccelerometer(bmaSensor.RANGE_2G, bmaSensor.ODR_100HZ, bmaSensor.BW_NORMAL_AVG4,
                                           bmaSensor.PERF_CONTINUOUS_MODE);
@@ -206,7 +232,8 @@ class AccelerometerThread : public concurrency::OSThread
             pinMode(BMA4XX_INT, INPUT);
             attachInterrupt(
                 BMA4XX_INT,
-                [] {
+                []
+                {
                     // Set interrupt to set irq value to true
                     BMA_IRQ = true;
                 },
@@ -215,9 +242,9 @@ class AccelerometerThread : public concurrency::OSThread
 
 #ifdef T_WATCH_S3
             // Need to raise the wrist function, need to set the correct axis
-            bmaSensor.setReampAxes(bmaSensor.REMAP_TOP_LAYER_RIGHT_CORNER);
+            bmaSensor.MAPsetRemapAxes(bmaSensor.REMAP_TOP_LAYER_RIGHT_CORNER);
 #else
-            bmaSensor.setReampAxes(bmaSensor.REMAP_BOTTOM_LAYER_BOTTOM_LEFT_CORNER);
+            bmaSensor.MAPsetRemapAxes(bmaSensor.REMAP_BOTTOM_LAYER_BOTTOM_LEFT_CORNER);
 #endif
             // bmaSensor.enableFeature(bmaSensor.FEATURE_STEP_CNTR, true);
             bmaSensor.enableFeature(bmaSensor.FEATURE_TILT, true);
@@ -230,11 +257,15 @@ class AccelerometerThread : public concurrency::OSThread
             // It corresponds to isDoubleClick interrupt
             bmaSensor.enableWakeupIRQ();
 #ifdef RAK_4631
-        } else if (acceleremoter_type == ScanI2C::DeviceType::BMX160 && bmx160.begin()) {
+        }
+        else if (acceleremoter_type == ScanI2C::DeviceType::BMX160 && bmx160.begin())
+        {
             bmx160.ODR_Config(BMX160_ACCEL_ODR_100HZ, BMX160_GYRO_ODR_100HZ); // set output data rate
 
 #endif
-        } else if (acceleremoter_type == ScanI2C::DeviceType::LSM6DS3 && lsm.begin_I2C(accelerometer_found.address)) {
+        }
+        else if (acceleremoter_type == ScanI2C::DeviceType::LSM6DS3 && lsm.begin_I2C(accelerometer_found.address))
+        {
             LOG_DEBUG("LSM6DS3 initializing\n");
             // Default threshold of 2G, less sensitive options are 4, 8 or 16G
             lsm.setAccelRange(LSM6DS_ACCEL_RANGE_2_G);
@@ -247,7 +278,8 @@ class AccelerometerThread : public concurrency::OSThread
     }
     void wakeScreen()
     {
-        if (powerFSM.getState() == &stateDARK) {
+        if (powerFSM.getState() == &stateDARK)
+        {
             LOG_INFO("Tap or motion detected. Turning on screen\n");
             powerFSM.trigger(EVENT_INPUT);
         }
@@ -281,10 +313,13 @@ class AccelerometerThread : public concurrency::OSThread
         uint16_t compassDiam = graphics::Screen::getCompassDiam(display->getWidth(), display->getHeight());
 
         // coordinates for the center of the compass/circle
-        if (config.display.displaymode == meshtastic_Config_DisplayConfig_DisplayMode_DEFAULT) {
+        if (config.display.displaymode == meshtastic_Config_DisplayConfig_DisplayMode_DEFAULT)
+        {
             compassX = x + display->getWidth() - compassDiam / 2 - 5;
             compassY = y + display->getHeight() / 2;
-        } else {
+        }
+        else
+        {
             compassX = x + display->getWidth() - compassDiam / 2 - 5;
             compassY = y + FONT_HEIGHT_SMALL + (display->getHeight() - FONT_HEIGHT_SMALL) / 2;
         }

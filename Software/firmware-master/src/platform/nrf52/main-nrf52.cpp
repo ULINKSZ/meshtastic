@@ -70,7 +70,8 @@ bool useSoftDevice = true; // Set to false for easier debugging
 void setBluetoothEnable(bool enable)
 {
     // For debugging use: don't use bluetooth
-    if (!useSoftDevice) {
+    if (!useSoftDevice)
+    {
         if (enable)
             LOG_INFO("DISABLING NRF52 BLUETOOTH WHILE DEBUGGING\n");
         return;
@@ -79,9 +80,11 @@ void setBluetoothEnable(bool enable)
     // If user disabled bluetooth: init then disable advertising & reduce power
     // Workaround. Avoid issue where device hangs several days after boot..
     // Allegedly, no significant increase in power consumption
-    if (!config.bluetooth.enabled) {
+    if (!config.bluetooth.enabled)
+    {
         static bool initialized = false;
-        if (!initialized) {
+        if (!initialized)
+        {
             nrf52Bluetooth = new NRF52Bluetooth();
             nrf52Bluetooth->startDisabled();
             initBrownout();
@@ -90,9 +93,11 @@ void setBluetoothEnable(bool enable)
         return;
     }
 
-    if (enable) {
+    if (enable)
+    {
         // If not yet set-up
-        if (!nrf52Bluetooth) {
+        if (!nrf52Bluetooth)
+        {
             LOG_DEBUG("Initializing NRF52 Bluetooth\n");
             nrf52Bluetooth = new NRF52Bluetooth();
             nrf52Bluetooth->setup();
@@ -126,10 +131,13 @@ int printf(const char *fmt, ...)
 
 void checkSDEvents()
 {
-    if (useSoftDevice) {
+    if (useSoftDevice)
+    {
         uint32_t evt;
-        while (NRF_SUCCESS == sd_evt_get(&evt)) {
-            switch (evt) {
+        while (NRF_SUCCESS == sd_evt_get(&evt))
+        {
+            switch (evt)
+            {
             case NRF_EVT_POWER_FAILURE_WARNING:
                 RECORD_CRITICALERROR(meshtastic_CriticalErrorCode_BROWNOUT);
                 break;
@@ -139,7 +147,9 @@ void checkSDEvents()
                 break;
             }
         }
-    } else {
+    }
+    else
+    {
         if (NRF_POWER->EVENTS_POFWARN)
             RECORD_CRITICALERROR(meshtastic_CriticalErrorCode_BROWNOUT);
     }
@@ -164,7 +174,8 @@ bool wantSemihost;
  */
 void nrf52InitSemiHosting()
 {
-    if (wantSemihost) {
+    if (wantSemihost)
+    {
         static SemihostingStream semiStream;
         // We must dynamically alloc because the constructor does semihost operations which
         // would crash any load not talking to a debugger
@@ -199,7 +210,8 @@ void nrf52Setup()
 #endif
 
     // Init random seed
-    union seedParts {
+    union seedParts
+    {
         uint32_t seed32;
         uint8_t seed8[4];
     } seed;
@@ -218,9 +230,11 @@ void cpuDeepSleep(uint32_t msecToWake)
     Wire.end();
 #endif
     SPI.end();
+    SPI1.end();
     // This may cause crashes as debug messages continue to flow.
     Serial.end();
-
+    Serial1.end();
+    Serial2.end();
 #ifdef PIN_SERIAL_RX1
     Serial1.end();
 #endif
@@ -253,23 +267,28 @@ void cpuDeepSleep(uint32_t msecToWake)
         (config.device.role == meshtastic_Config_DeviceConfig_Role_TRACKER ||
          config.device.role == meshtastic_Config_DeviceConfig_Role_TAK_TRACKER ||
          config.device.role == meshtastic_Config_DeviceConfig_Role_SENSOR) &&
-        config.power.is_power_saving == true) {
+        config.power.is_power_saving == true)
+    {
         sd_power_mode_set(NRF_POWER_MODE_LOWPWR);
         delay(msecToWake);
         NVIC_SystemReset();
-    } else {
+    }
+    else
+    {
         // FIXME, use system off mode with ram retention for key state?
         // FIXME, use non-init RAM per
         // https://devzone.nordicsemi.com/f/nordic-q-a/48919/ram-retention-settings-with-softdevice-enabled
         auto ok = sd_power_system_off();
-        if (ok != NRF_SUCCESS) {
+        if (ok != NRF_SUCCESS)
+        {
             LOG_ERROR("FIXME: Ignoring soft device (EasyDMA pending?) and forcing system-off!\n");
             NRF_POWER->SYSTEMOFF = 1;
         }
     }
 
     // The following code should not be run, because we are off
-    while (1) {
+    while (1)
+    {
         delay(5000);
         LOG_DEBUG(".");
     }
@@ -277,7 +296,8 @@ void cpuDeepSleep(uint32_t msecToWake)
 
 void clearBonds()
 {
-    if (!nrf52Bluetooth) {
+    if (!nrf52Bluetooth)
+    {
         nrf52Bluetooth = new NRF52Bluetooth();
         nrf52Bluetooth->setup();
     }

@@ -103,6 +103,7 @@ public:
 
     virtual bool isVbusIn() { return false; }
     virtual bool isCharging() { return false; }
+    virtual float chargerate() { return false; }
 };
 #else
 #include "XPowersAXP192.tpp"
@@ -470,6 +471,15 @@ class AnalogBatteryLevel : public HasBatteryLevel, public Adafruit_MAX17048
 #endif
     }
 
+    virtual float chargerate() override
+    {
+        if (isCharging())
+        {
+            return chargeRate();
+        }
+        return false;
+    }
+
 private:
     /// If we see a battery voltage higher than physics allows - assume charger is pumping
     /// in power
@@ -654,6 +664,10 @@ bool Power::setup()
 #ifdef HAS_MAX17048
     Wire.begin();
     bool found = analogLevel.begin(&Wire);
+    // low power
+    analogLevel.enableSleep(true);
+    analogLevel.sleep(true);
+
     batteryLevel = &analogLevel;
 #else
     bool found = axpChipInit() || analogInit();
@@ -668,7 +682,7 @@ void Power::shutdown()
 {
     LOG_INFO("Shutting down\n");
 #ifdef MAX17048
-    analogLevel.sleep(true);
+    analogLevel.hibernate();
 #endif
 #if defined(ARCH_NRF52) || defined(ARCH_ESP32)
 #ifdef PIN_LED1
@@ -730,13 +744,8 @@ void Power::readPowerStatus()
                 powerFSM.trigger(EVENT_POWER_DISCONNECTED);
                 NRF_USB = OptFalse;
                 // rebootAtMsec = (millis() + 2 * 1000);
-<<<<<<< HEAD
                 // if (power != NULL)
                 //     power->setup();
-=======
-                if (power != NULL)
-                    power->setup();
->>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
             }
             // If changed to CONNECTED / READY
             else
@@ -753,11 +762,12 @@ void Power::readPowerStatus()
         const PowerStatus powerStatus2 = PowerStatus(
             hasBattery ? OptTrue : OptFalse, batteryLevel->isVbusIn() || NRF_USB == OptTrue ? OptTrue : OptFalse,
             batteryLevel->isCharging() || NRF_USB == OptTrue ? OptTrue : OptFalse, batteryVoltageMv, batteryChargePercent);
-        LOG_DEBUG("Battery: usbPower=%d, isCharging=%d, batMv=%d, batPct=%d\n",
+        LOG_DEBUG("Battery: usbPower=%d, isCharging=%d, batMv=%d, batPct=%d, chargerate=%f\n",
                   powerStatus2.getHasUSB(),
                   powerStatus2.getIsCharging(),
                   powerStatus2.getBatteryVoltageMv(),
-                  powerStatus2.getBatteryChargePercent());
+                  powerStatus2.getBatteryChargePercent(),
+                  batteryLevel->chargerate());
         newStatus.notifyObservers(&powerStatus2);
 #ifdef DEBUG_HEAP
         if (lastheap != memGet.getFreeHeap())

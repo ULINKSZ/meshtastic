@@ -23,7 +23,8 @@ SX126xInterface<T>::SX126xInterface(LockingArduinoHal *hal, RADIOLIB_PIN_TYPE cs
 /// Initialise the Driver transport hardware and software.
 /// Make sure the Driver is properly configured before calling init().
 /// \return true if initialisation succeeded.
-template <typename T> bool SX126xInterface<T>::init()
+template <typename T>
+bool SX126xInterface<T>::init()
 {
 #ifdef SX126X_POWER_EN
     pinMode(SX126X_POWER_EN, OUTPUT);
@@ -86,7 +87,8 @@ template <typename T> bool SX126xInterface<T>::init()
     bool dio2AsRfSwitch = true;
 #elif defined(ARCH_PORTDUINO)
     bool dio2AsRfSwitch = false;
-    if (settingsMap[dio2_as_rf_switch]) {
+    if (settingsMap[dio2_as_rf_switch])
+    {
         LOG_DEBUG("Setting DIO2 as RF switch\n");
         dio2AsRfSwitch = true;
     }
@@ -94,14 +96,16 @@ template <typename T> bool SX126xInterface<T>::init()
     LOG_DEBUG("Setting DIO2 as not RF switch\n");
     bool dio2AsRfSwitch = false;
 #endif
-    if (res == RADIOLIB_ERR_NONE) {
+    if (res == RADIOLIB_ERR_NONE)
+    {
         res = lora.setDio2AsRfSwitch(dio2AsRfSwitch);
     }
 
     // If a pin isn't defined, we set it to RADIOLIB_NC, it is safe to always do external RF switching with RADIOLIB_NC as it has
     // no effect
 #if ARCH_PORTDUINO
-    if (res == RADIOLIB_ERR_NONE) {
+    if (res == RADIOLIB_ERR_NONE)
+    {
         LOG_DEBUG("Using MCU pin %i as RXEN and pin %i as TXEN to control RF switching\n", settingsMap[rxen], settingsMap[txen]);
         lora.setRfSwitchPins(settingsMap[rxen], settingsMap[txen]);
     }
@@ -114,15 +118,19 @@ template <typename T> bool SX126xInterface<T>::init()
 #define SX126X_TXEN RADIOLIB_NC
     LOG_DEBUG("SX126X_TXEN not defined, defaulting to RADIOLIB_NC\n");
 #endif
-    if (res == RADIOLIB_ERR_NONE) {
+    if (res == RADIOLIB_ERR_NONE)
+    {
         LOG_DEBUG("Using MCU pin %i as RXEN and pin %i as TXEN to control RF switching\n", SX126X_RXEN, SX126X_TXEN);
         lora.setRfSwitchPins(SX126X_RXEN, SX126X_TXEN);
     }
 #endif
-    if (config.lora.sx126x_rx_boosted_gain) {
+    if (config.lora.sx126x_rx_boosted_gain)
+    {
         uint16_t result = lora.setRxBoostedGainMode(true);
         LOG_INFO("Set RX gain to boosted mode; result: %d\n", result);
-    } else {
+    }
+    else
+    {
         uint16_t result = lora.setRxBoostedGainMode(false);
         LOG_INFO("Set RX gain to power saving mode (boosted mode off); result: %d\n", result);
     }
@@ -160,7 +168,8 @@ template <typename T> bool SX126xInterface<T>::init()
     return res == RADIOLIB_ERR_NONE;
 }
 
-template <typename T> bool SX126xInterface<T>::reconfigure()
+template <typename T>
+bool SX126xInterface<T>::reconfigure()
 {
     RadioLibInterface::reconfigure();
 
@@ -212,12 +221,14 @@ template <typename T> bool SX126xInterface<T>::reconfigure()
     return RADIOLIB_ERR_NONE;
 }
 
-template <typename T> void INTERRUPT_ATTR SX126xInterface<T>::disableInterrupt()
+template <typename T>
+void INTERRUPT_ATTR SX126xInterface<T>::disableInterrupt()
 {
     lora.clearDio1Action();
 }
 
-template <typename T> void SX126xInterface<T>::setStandby()
+template <typename T>
+void SX126xInterface<T>::setStandby()
 {
     checkNotification(); // handle any pending interrupts before we force standby
 
@@ -237,7 +248,8 @@ template <typename T> void SX126xInterface<T>::setStandby()
 /**
  * Add SNR data to received messages
  */
-template <typename T> void SX126xInterface<T>::addReceiveMetadata(meshtastic_MeshPacket *mp)
+template <typename T>
+void SX126xInterface<T>::addReceiveMetadata(meshtastic_MeshPacket *mp)
 {
     // LOG_DEBUG("PacketStatus %x\n", lora.getPacketStatus());
     mp->rx_snr = lora.getSNR();
@@ -246,7 +258,8 @@ template <typename T> void SX126xInterface<T>::addReceiveMetadata(meshtastic_Mes
 
 /** We override to turn on transmitter power as needed.
  */
-template <typename T> void SX126xInterface<T>::configHardwareForSend()
+template <typename T>
+void SX126xInterface<T>::configHardwareForSend()
 {
     RadioLibInterface::configHardwareForSend();
 }
@@ -254,7 +267,8 @@ template <typename T> void SX126xInterface<T>::configHardwareForSend()
 // For power draw measurements, helpful to force radio to stay sleeping
 // #define SLEEP_ONLY
 
-template <typename T> void SX126xInterface<T>::startReceive()
+template <typename T>
+void SX126xInterface<T>::startReceive()
 {
 #ifdef SLEEP_ONLY
     sleep();
@@ -279,7 +293,8 @@ template <typename T> void SX126xInterface<T>::startReceive()
 }
 
 /** Is the channel currently active? */
-template <typename T> bool SX126xInterface<T>::isChannelActive()
+template <typename T>
+bool SX126xInterface<T>::isChannelActive()
 {
     // check if we can detect a LoRa preamble on the current channel
     int16_t result;
@@ -296,7 +311,8 @@ template <typename T> bool SX126xInterface<T>::isChannelActive()
 }
 
 /** Could we send right now (i.e. either not actively receiving or transmitting)? */
-template <typename T> bool SX126xInterface<T>::isActivelyReceiving()
+template <typename T>
+bool SX126xInterface<T>::isActivelyReceiving()
 {
     // The IRQ status will be cleared when we start our read operation. Check if we've started a header, but haven't yet
     // received and handled the interrupt for reading the packet/handling errors.
@@ -304,16 +320,22 @@ template <typename T> bool SX126xInterface<T>::isActivelyReceiving()
     uint16_t irq = lora.getIrqStatus();
     bool detected = (irq & (RADIOLIB_SX126X_IRQ_HEADER_VALID | RADIOLIB_SX126X_IRQ_PREAMBLE_DETECTED));
     // Handle false detections
-    if (detected) {
+    if (detected)
+    {
         uint32_t now = millis();
-        if (!activeReceiveStart) {
+        if (!activeReceiveStart)
+        {
             activeReceiveStart = now;
-        } else if ((now - activeReceiveStart > 2 * preambleTimeMsec) && !(irq & RADIOLIB_SX126X_IRQ_HEADER_VALID)) {
+        }
+        else if ((now - activeReceiveStart > 2 * preambleTimeMsec) && !(irq & RADIOLIB_SX126X_IRQ_HEADER_VALID))
+        {
             // The HEADER_VALID flag should be set by now if it was really a packet, so ignore PREAMBLE_DETECTED flag
             activeReceiveStart = 0;
             LOG_DEBUG("Ignore false preamble detection.\n");
             return false;
-        } else if (now - activeReceiveStart > maxPacketTimeMsec) {
+        }
+        else if (now - activeReceiveStart > maxPacketTimeMsec)
+        {
             // We should have gotten an RX_DONE IRQ by now if it was really a packet, so ignore HEADER_VALID flag
             activeReceiveStart = 0;
             LOG_DEBUG("Ignore false header detection.\n");
@@ -325,7 +347,8 @@ template <typename T> bool SX126xInterface<T>::isActivelyReceiving()
     return detected;
 }
 
-template <typename T> bool SX126xInterface<T>::sleep()
+template <typename T>
+bool SX126xInterface<T>::sleep()
 {
     // Not keeping config is busted - next time nrf52 board boots lora sending fails  tcxo related? - see datasheet
     // \todo Display actual typename of the adapter, not just `SX126x`

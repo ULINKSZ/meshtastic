@@ -800,7 +800,7 @@ bool GPS::setup()
                 delay(250);
                 // disable I2C RAM
                 clearBuffer();
-                uint8_t arr1[] = {0xB5, 0x62, 0x06, 0x8A, 0x09, 0x00, 0x01, 0x01, 0x00, 0x00, 0x03, 0x00, 0x51, 0x10, 0x00, 0xFF, 0x5C};
+                uint8_t arr1[] = {0xB5, 0x62, 0x06, 0x8A, 0x30, 0x00, 0x01, 0x01, 0x00, 0x00, 0x21, 0x00, 0x11, 0x20, 0x03, 0x05, 0x00, 0x22, 0x20, 0x00, 0xB3, 0x00, 0x11, 0x30, 0x1E, 0x00, 0x07, 0x00, 0x91, 0x20, 0x01, 0x16, 0x00, 0x91, 0x20, 0x01, 0x1B, 0x00, 0x91, 0x20, 0x01, 0x02, 0x00, 0xD0, 0x40, 0x1E, 0x00, 0x00, 0x00, 0x01, 0x00, 0xD0, 0x20, 0x02, 0xE1, 0x45};
                 _serial_gps->write(arr1, sizeof(arr1));
                 if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
                 {
@@ -809,154 +809,154 @@ bool GPS::setup()
                 delay(250);
                 // disable I2C BRR
                 clearBuffer();
-                uint8_t arr2[] = {0xB5, 0x62, 0x06, 0x8A, 0x09, 0x00, 0x01, 0x02, 0x00, 0x00, 0x03, 0x00, 0x51, 0x10, 0x00, 0x00, 0x64};
+                uint8_t arr2[] = {0xB5, 0x62, 0x06, 0x8A, 0x30, 0x00, 0x01, 0x02, 0x00, 0x00, 0x21, 0x00, 0x11, 0x20, 0x03, 0x05, 0x00, 0x22, 0x20, 0x00, 0xB3, 0x00, 0x11, 0x30, 0x1E, 0x00, 0x07, 0x00, 0x91, 0x20, 0x01, 0x16, 0x00, 0x91, 0x20, 0x01, 0x1B, 0x00, 0x91, 0x20, 0x01, 0x02, 0x00, 0xD0, 0x40, 0x1E, 0x00, 0x00, 0x00, 0x01, 0x00, 0xD0, 0x20, 0x02, 0xE2, 0x74};
                 _serial_gps->write(arr2, sizeof(arr2));
                 if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
                 {
                     LOG_WARN("Unable to disable I2C for M10 GPS BRR.\n");
                 }
-                delay(250);
-                // First disable all NMEA messages in RAM layer
-                msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_NMEA_RAM), _message_VALSET_DISABLE_NMEA_RAM);
-                clearBuffer();
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable NMEA messages for M10 GPS RAM.\n");
-                }
-                delay(250);
-                // Next disable unwanted NMEA messages in BBR layer
-                msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_NMEA_BBR), _message_VALSET_DISABLE_NMEA_BBR);
-                clearBuffer();
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable NMEA messages for M10 GPS BBR.\n");
-                }
+                // delay(250);
+                // // First disable all NMEA messages in RAM layer
+                // msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_NMEA_RAM), _message_VALSET_DISABLE_NMEA_RAM);
+                // clearBuffer();
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable NMEA messages for M10 GPS RAM.\n");
+                // }
+                // delay(250);
+                // // Next disable unwanted NMEA messages in BBR layer
+                // msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_NMEA_BBR), _message_VALSET_DISABLE_NMEA_BBR);
+                // clearBuffer();
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable NMEA messages for M10 GPS BBR.\n");
+                // }
 
-                delay(250);
-                // Disable Info txt messages in RAM layer
-                msglen =
-                    makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_TXT_INFO_RAM), _message_VALSET_DISABLE_TXT_INFO_RAM);
-                clearBuffer();
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable Info messages for M10 GPS RAM.\n");
-                }
-                delay(250);
-                // Next disable Info txt messages in BBR layer
-                msglen =
-                    makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_TXT_INFO_BBR), _message_VALSET_DISABLE_TXT_INFO_BBR);
-                clearBuffer();
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable Info messages for M10 GPS BBR.\n");
-                }
-                delay(250);
-                msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_ITFM_RAM), _message_VALSET_ITFM_RAM);
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to enable Jamming detection M10 GPS RAM.\n");
-                }
-                delay(250);
-                msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_ITFM_BBR), _message_VALSET_ITFM_BBR);
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to enable Jamming detection M10 GPS BBR.\n");
-                }
+                // delay(250);
+                // // Disable Info txt messages in RAM layer
+                // msglen =
+                //     makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_TXT_INFO_RAM), _message_VALSET_DISABLE_TXT_INFO_RAM);
+                // clearBuffer();
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable Info messages for M10 GPS RAM.\n");
+                // }
+                // delay(250);
+                // // Next disable Info txt messages in BBR layer
+                // msglen =
+                //     makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_TXT_INFO_BBR), _message_VALSET_DISABLE_TXT_INFO_BBR);
+                // clearBuffer();
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable Info messages for M10 GPS BBR.\n");
+                // }
+                // delay(250);
+                // msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_ITFM_RAM), _message_VALSET_ITFM_RAM);
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to enable Jamming detection M10 GPS RAM.\n");
+                // }
+                // delay(250);
+                // msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_ITFM_BBR), _message_VALSET_ITFM_BBR);
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to enable Jamming detection M10 GPS BBR.\n");
+                // }
 
-                // Here is where the init commands should go to do further M10 initialization.
-                delay(250);
-                msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_SBAS_RAM), _message_VALSET_DISABLE_SBAS_RAM);
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable SBAS M10 GPS RAM.\n");
-                }
-                delay(750); // will cause a receiver restart so wait a bit
-                msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_SBAS_BBR), _message_VALSET_DISABLE_SBAS_BBR);
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable SBAS M10 GPS BBR.\n");
-                }
-                delay(750);
-                // disable BDS RAM
-                clearBuffer();
-                uint8_t arr3[] = {0xB5, 0x62, 0x06, 0x8A, 0x09, 0x00, 0x01, 0x01, 0x00, 0x00, 0x22, 0x00, 0x31, 0x10, 0x00, 0xFE, 0x97};
-                _serial_gps->write(arr3, sizeof(arr3));
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable BDS for M10 GPS RAM.\n");
-                }
-                delay(750);
-                // disable BDS BRR
-                clearBuffer();
-                uint8_t arr4[] = {0xB5, 0x62, 0x06, 0x8A, 0x09, 0x00, 0x01, 0x02, 0x00, 0x00, 0x22, 0x00, 0x31, 0x10, 0x00, 0xFF, 0x9F};
-                _serial_gps->write(arr4, sizeof(arr4));
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable BDS for M10 GPS bBRR.\n");
-                }
-                delay(750);
-                // disable QZSS RAM
-                clearBuffer();
-                uint8_t arr5[] = {0xB5, 0x62, 0x06, 0x8A, 0x09, 0x00, 0x01, 0x01, 0x00, 0x00, 0x24, 0x00, 0x31, 0x10, 0x00, 0x00, 0xA1};
-                _serial_gps->write(arr5, sizeof(arr5));
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable QZSS for M10 GPS RAM.\n");
-                }
-                delay(750);
-                // disable QZSS BRR
-                clearBuffer();
-                uint8_t arr6[] = {
-                    0xB5,
-                    0x62,
-                    0x06,
-                    0x8A,
-                    0x09,
-                    0x00,
-                    0x01,
-                    0x02,
-                    0x00,
-                    0x00,
-                    0x24,
-                    0x00,
-                    0x31,
-                    0x10,
-                    0x00,
-                    0x01,
-                    0xA9,
-                };
-                _serial_gps->write(arr6, sizeof(arr6));
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to disable QZSS for M10 GPS BRR.\n");
-                }
-                delay(750); // will cause a receiver restart so wait a bit
-                // Done with initialization, Now enable wanted NMEA messages in BBR layer so they will survive a periodic sleep.
-                msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_ENABLE_NMEA_BBR), _message_VALSET_ENABLE_NMEA_BBR);
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to enable messages for M10 GPS BBR.\n");
-                }
-                delay(250);
-                // Next enable wanted NMEA messages in RAM layer
-                msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_ENABLE_NMEA_RAM), _message_VALSET_ENABLE_NMEA_RAM);
-                _serial_gps->write(UBXscratch, msglen);
-                if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
-                {
-                    LOG_WARN("Unable to enable messages for M10 GPS RAM.\n");
-                }
-                // As the M10 has no flash, the best we can do to preserve the config is to set it in RAM and BBR.
-                // BBR will survive a restart, and power off for a while, but modules with small backup
-                // batteries or super caps will not retain the config for a long power off time. a long power off time.
+                // // Here is where the init commands should go to do further M10 initialization.
+                // delay(250);
+                // msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_SBAS_RAM), _message_VALSET_DISABLE_SBAS_RAM);
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable SBAS M10 GPS RAM.\n");
+                // }
+                // delay(750); // will cause a receiver restart so wait a bit
+                // msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_DISABLE_SBAS_BBR), _message_VALSET_DISABLE_SBAS_BBR);
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable SBAS M10 GPS BBR.\n");
+                // }
+                // delay(750);
+                // // disable BDS RAM
+                // clearBuffer();
+                // uint8_t arr3[] = {0xB5, 0x62, 0x06, 0x8A, 0x09, 0x00, 0x01, 0x01, 0x00, 0x00, 0x22, 0x00, 0x31, 0x10, 0x00, 0xFE, 0x97};
+                // _serial_gps->write(arr3, sizeof(arr3));
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable BDS for M10 GPS RAM.\n");
+                // }
+                // delay(750);
+                // // disable BDS BRR
+                // clearBuffer();
+                // uint8_t arr4[] = {0xB5, 0x62, 0x06, 0x8A, 0x09, 0x00, 0x01, 0x02, 0x00, 0x00, 0x22, 0x00, 0x31, 0x10, 0x00, 0xFF, 0x9F};
+                // _serial_gps->write(arr4, sizeof(arr4));
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable BDS for M10 GPS bBRR.\n");
+                // }
+                // delay(750);
+                // // disable QZSS RAM
+                // clearBuffer();
+                // uint8_t arr5[] = {0xB5, 0x62, 0x06, 0x8A, 0x09, 0x00, 0x01, 0x01, 0x00, 0x00, 0x24, 0x00, 0x31, 0x10, 0x00, 0x00, 0xA1};
+                // _serial_gps->write(arr5, sizeof(arr5));
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable QZSS for M10 GPS RAM.\n");
+                // }
+                // delay(750);
+                // // disable QZSS BRR
+                // clearBuffer();
+                // uint8_t arr6[] = {
+                //     0xB5,
+                //     0x62,
+                //     0x06,
+                //     0x8A,
+                //     0x09,
+                //     0x00,
+                //     0x01,
+                //     0x02,
+                //     0x00,
+                //     0x00,
+                //     0x24,
+                //     0x00,
+                //     0x31,
+                //     0x10,
+                //     0x00,
+                //     0x01,
+                //     0xA9,
+                // };
+                // _serial_gps->write(arr6, sizeof(arr6));
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to disable QZSS for M10 GPS BRR.\n");
+                // }
+                // delay(750); // will cause a receiver restart so wait a bit
+                // // Done with initialization, Now enable wanted NMEA messages in BBR layer so they will survive a periodic sleep.
+                // msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_ENABLE_NMEA_BBR), _message_VALSET_ENABLE_NMEA_BBR);
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to enable messages for M10 GPS BBR.\n");
+                // }
+                // delay(250);
+                // // Next enable wanted NMEA messages in RAM layer
+                // msglen = makeUBXPacket(0x06, 0x8A, sizeof(_message_VALSET_ENABLE_NMEA_RAM), _message_VALSET_ENABLE_NMEA_RAM);
+                // _serial_gps->write(UBXscratch, msglen);
+                // if (getACK(0x06, 0x8A, 300) != GNSS_RESPONSE_OK)
+                // {
+                //     LOG_WARN("Unable to enable messages for M10 GPS RAM.\n");
+                // }
+                // // As the M10 has no flash, the best we can do to preserve the config is to set it in RAM and BBR.
+                // // BBR will survive a restart, and power off for a while, but modules with small backup
+                // // batteries or super caps will not retain the config for a long power off time. a long power off time.
             }
             msglen = makeUBXPacket(0x06, 0x09, sizeof(_message_SAVE), _message_SAVE);
             _serial_gps->write(UBXscratch, msglen);
@@ -1060,8 +1060,22 @@ void GPS::writePinEN(bool on)
     bool val = GPS_EN_ACTIVE ? on : !on;
 
     // Write and log
-    pinMode(en_gpio, OUTPUT);
-    digitalWrite(en_gpio, val);
+    if (val)
+    {
+        pinMode(en_gpio, OUTPUT);
+        pinMode(PIN_SERIAL1_RX, OUTPUT);
+        pinMode(PIN_SERIAL1_TX, OUTPUT);
+        digitalWrite(en_gpio, val);
+        _serial_gps->begin(GPS_BAUDRATE);
+    }
+    else
+    {
+        pinMode(PIN_SERIAL1_RX, INPUT);
+        pinMode(PIN_SERIAL1_TX, INPUT);
+        pinMode(en_gpio, INPUT);
+        _serial_gps->end();
+    }
+
 #ifdef GPS_EXTRAVERBOSE
     LOG_DEBUG("Pin EN %s\n", val == HIGH ? "HIGH" : "LOW");
 #endif
@@ -2083,14 +2097,11 @@ int32_t GPS::disable()
     return INT32_MAX;
 }
 
-<<<<<<< HEAD
 bool GPS::readenabled()
 {
     return enabled;
 }
 
-=======
->>>>>>> 8458afa345dbcf67a06761ddd18c171214b21447
 void GPS::toggleGpsMode()
 {
     if (config.position.gps_mode == meshtastic_Config_PositionConfig_GpsMode_ENABLED)
